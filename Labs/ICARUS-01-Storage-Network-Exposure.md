@@ -221,7 +221,49 @@ The benign-positive classification reflects a correct detection of expected acti
 
 ## Evidence
 
-Screenshots will be added after redacting personal identifiers.
+Personal identifiers have been redacted where applicable.
+
+### 1. Exposure request
+
+The request event shows public network access enabled and the network default action set to Allow.
+
+![Exposure request](../Screenshots/ICARUS-01/01-exposure-request-redacted.png)
+
+### 2. Successful completion
+
+The Start and Success events were matched using the exposure request's correlation ID.
+
+![Exposure request completion](../Screenshots/ICARUS-01/02-exposure-success-redacted.png)
+
+### 3. Restoration request
+
+The logged settings show the Allow request followed by a Deny request to restore selected-network access.
+
+![Restoration events](../Screenshots/ICARUS-01/03-restoration-events.png)
+
+### 4. Restoration completion
+
+The event timeline shows Start and Success records for both updates. The restoration update completed at 16:04:14.699 UTC.
+
+![Restoration completion](../Screenshots/ICARUS-01/04-restoration-success.png)
+
+### 5. Alert generated
+
+Microsoft Sentinel generated an ICARUS-01 alert recorded at 16:17:07.004 UTC.
+
+![Sentinel alert generated](../Screenshots/ICARUS-01/05-alert-generated.png)
+
+### 6. Incident closed
+
+The incident was closed as Benign Positive following investigation of the authorized lab test.
+
+![Incident closed](../Screenshots/ICARUS-01/06-incident-closed.png)
+
+### 7. Current network settings
+
+A subsequent portal check confirms that access is enabled from selected networks.
+
+![Current network settings](../Screenshots/ICARUS-01/07-current-network-settings.png)
 
 | Evidence | Purpose |
 |---|---|
