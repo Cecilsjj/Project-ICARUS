@@ -55,6 +55,8 @@ A hands-on Azure security lab focused on detecting risky configuration changes, 
 
 ## ICARUS-01 — Storage Account All-Networks Access
 
+[Read the full investigation and response case study](Labs/ICARUS-01-Storage-Network-Exposure.md)
+
 ### Objective
 
 Detect an update request that enables public network access and sets the storage account's network default action to Allow.
