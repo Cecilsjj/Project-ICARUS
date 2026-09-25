@@ -47,7 +47,7 @@ A hands-on Azure security lab focused on detecting risky configuration changes, 
 
 | Scenario | Focus | Status |
 |---|---|---|
-| ICARUS-01 | Detect storage account all-networks access | Test and incident workflow complete; write-up in progress |
+| ICARUS-01 | Detect storage account all-networks access | Completed — case study and evidence published |
 | ICARUS-02 | Investigate excessive permissions | Planned |
 | Security posture review | Review policy and configuration improvements | Planned |
 
