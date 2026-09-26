@@ -1,6 +1,6 @@
 # PROJECT ICARUS — Azure Cloud Security Lab
 
-A hands-on Azure security lab focused on detecting risky configuration changes, investigating alerts, verifying remediation, and documenting incident response.
+A hands-on Azure security lab focused on detecting risky configuration and access-control changes, investigating Microsoft Sentinel alerts, validating remediation, and documenting incident response.
 
 **Azure Activity Logs → Microsoft Sentinel Detection → Investigation → Remediation Verification → Incident Closure**
 
@@ -8,11 +8,14 @@ A hands-on Azure security lab focused on detecting risky configuration changes, 
 
 ## Project Goals
 
-- Establish a secure Azure lab baseline.
+- Establish and validate secure Azure lab baselines.
 - Collect and investigate Azure Activity Logs.
 - Build and validate Microsoft Sentinel detection rules.
-- Investigate storage exposure and excessive permissions.
-- Document findings, response actions, and security improvements.
+- Investigate risky storage-network configuration changes.
+- Investigate excessive Azure RBAC permissions.
+- Correlate security events with their underlying Azure operations.
+- Verify remediation and restoration of expected security controls.
+- Document findings, response actions, and final incident disposition.
 
 ---
 
@@ -22,24 +25,33 @@ A hands-on Azure security lab focused on detecting risky configuration changes, 
 |---|---|
 | Microsoft Azure | Cloud lab environment |
 | RG-PROJECT-ICARUS | Resource group containing lab resources |
-| sticaruslabjoey | Storage account used for controlled testing |
+| sticaruslabjoey | Storage account used for controlled configuration testing |
 | law-project-icarus | Log Analytics workspace |
-| Microsoft Sentinel | Alert detection and incident investigation |
-| Azure Activity Logs | Evidence of resource configuration changes |
+| Microsoft Sentinel | Detection, alerting, and incident investigation |
+| Azure Activity Logs | Control-plane evidence of configuration and access changes |
+| Azure RBAC | Identity and permission-management testing |
 
 ---
 
 ## Skills Demonstrated
 
-- Azure security configuration
-- Activity Log collection and analysis
+- Microsoft Azure security
+- Microsoft Sentinel
+- Azure Activity Log investigation
+- Azure Role-Based Access Control (RBAC)
 - Kusto Query Language (KQL)
 - JSON request-body parsing
 - Scheduled analytics rule configuration
-- Alert triage and incident ownership
-- Event correlation and completion verification
+- Cloud-security detection engineering
+- Alert triage
+- Incident investigation
+- Event correlation
+- Correlation ID analysis
+- Privilege-change investigation
 - Remediation validation
-- Incident classification and documentation
+- Access-baseline verification
+- Incident classification
+- Security documentation
 
 ---
 
@@ -47,9 +59,12 @@ A hands-on Azure security lab focused on detecting risky configuration changes, 
 
 | Scenario | Focus | Status |
 |---|---|---|
-| ICARUS-01 | Detect storage account all-networks access | Completed — case study and evidence published |
-| ICARUS-02 | Investigate excessive permissions | Planned |
-| Security posture review | Review policy and configuration improvements | Planned |
+| ICARUS-01 | Detect Azure Storage all-networks access | Completed |
+| ICARUS-02 | Detect and investigate excessive Azure RBAC permissions | Completed |
+
+**Project ICARUS technical lab: Complete**
+
+The remaining work is portfolio maintenance and future detection tuning rather than completion of the core lab scenarios.
 
 ---
 
@@ -59,57 +74,175 @@ A hands-on Azure security lab focused on detecting risky configuration changes, 
 
 ### Objective
 
-Detect an update request that enables public network access and sets the storage account's network default action to Allow.
+Detect an Azure Storage update that allows access from all networks, investigate whether the change succeeded, and verify restoration of selected-network access.
 
 ### Completed Workflow
 
-1. Created a scheduled Microsoft Sentinel analytics rule.
-2. Performed an authorized all-networks configuration change.
-3. Immediately restored selected-network access.
-4. Confirmed the rule generated an alert and incident.
-5. Investigated the underlying Azure Activity Log event.
-6. Matched the request to its successful completion using its correlation ID.
-7. Verified restoration of selected-network access.
-8. Assigned and closed the incident as **Benign Positive — Suspicious but expected**.
+1. Established the storage account's expected network-access baseline.
+2. Created a scheduled Microsoft Sentinel analytics rule.
+3. Performed an authorized all-networks configuration change.
+4. Immediately restored selected-network access.
+5. Queried Azure Activity Logs to investigate both operations.
+6. Confirmed the rule generated an alert and incident.
+7. Traced the alert to the underlying Azure Activity Log request.
+8. Matched the request to successful completion using its correlation ID.
+9. Verified restoration of selected-network access.
+10. Closed the incident as **Benign Positive — Suspicious but expected**.
 
 ### Investigation Outcome
 
-The rule detected the intended configuration change. Incident #1 was investigated and closed as authorized lab activity.
+The Sentinel rule successfully detected the intended storage-network configuration change.
 
-The evidence confirms a network configuration change. It does not establish anonymous blob access or data exfiltration.
+The investigation confirmed that the all-networks update completed successfully and that the subsequent restoration also completed successfully.
+
+The available evidence establishes a network configuration change. It does not establish anonymous blob access, data access, or data exfiltration.
 
 ### Improvement Identified
 
-Repeated alerts were observed for the same event time, consistent with overlapping query windows. Alert deduplication is a planned tuning improvement.
+Repeated alerts were observed for the same event time, consistent with overlapping query windows.
+
+Future tuning should evaluate deduplication while preserving detection coverage for delayed events.
+
+---
+
+## ICARUS-02 — Excessive RBAC Permissions
+
+[Read the full investigation and response case study](Labs/ICARUS-02-Excessive-RBAC-Permissions.md)
+
+### Objective
+
+Detect an Azure RBAC change that grants the ICARUS Test User permissions beyond the intended Reader baseline, investigate whether the role assignment succeeded, and verify removal of the excessive access.
+
+### Completed Workflow
+
+1. Confirmed the ICARUS Test User had Reader access.
+2. Temporarily assigned the Contributor role.
+3. Verified that Reader and Contributor were both present in Access Control (IAM).
+4. Generated Azure Activity Log telemetry for the role-assignment change.
+5. Confirmed Microsoft Sentinel generated a Medium-severity incident.
+6. Investigated the underlying `Microsoft.Authorization/roleAssignments/write` event.
+7. Reviewed the caller, resource group, operation, and correlation ID.
+8. Removed the temporary Contributor role.
+9. Verified the role-assignment deletion in Azure Activity Logs.
+10. Confirmed the ICARUS Test User returned to Reader-only access.
+11. Resolved the incident as a **Benign Positive — Security Testing**.
+
+### Investigation Outcome
+
+Microsoft Sentinel successfully detected the RBAC role-assignment activity.
+
+The underlying Azure Activity Log event confirmed a successful role-assignment write in `RG-PROJECT-ICARUS`.
+
+The temporary Contributor assignment was removed, and the test user was verified as returned to the intended Reader-only baseline.
+
+The observed evidence confirms that excessive permissions were temporarily assigned and later removed. It does not establish that the elevated permissions were used to modify Azure resources.
+
+### Improvement Identified
+
+The activity event used during the investigation did not directly expose the human-readable role name.
+
+Future improvements should evaluate:
+
+- Entity mapping
+- Custom alert details
+- Direct role-definition enrichment
+- Higher-privilege role filtering
+- Duplicate-alert tuning
+
+---
+
+## Investigation Flow
+
+```text
+Controlled Azure Security Change
+            |
+            v
+Azure Activity Log Telemetry
+            |
+            v
+Microsoft Sentinel Detection
+            |
+            v
+Alert / Incident Generation
+            |
+            v
+Underlying Event Investigation
+            |
+            v
+Remediation
+            |
+            v
+Baseline Validation
+            |
+            v
+Incident Classification and Closure
+```
 
 ---
 
 ## Key Security Lessons
 
-- A request event alone does not prove that a change succeeded.
-- Correlation IDs connect requests to their completion events.
-- Restoring a setting does not remove the historical evidence of the change.
-- A correct detection can represent authorized activity.
-- Incident grouping and alert deduplication serve different purposes.
+- A security alert is the beginning of an investigation, not the conclusion.
+- A request event does not always prove that an operation completed successfully.
+- Correlation IDs can connect related Azure control-plane events.
+- Azure Activity Logs provide valuable evidence for configuration and access-control changes.
+- RBAC changes should be reviewed in context because legitimate administrative activity can resemble suspicious privilege escalation.
+- A correct security detection can represent authorized activity.
+- Remediation should be followed by validation that the expected baseline was actually restored.
+- Historical logs remain valuable even after a risky configuration or permission has been removed.
+- Detection logic should reflect the limits of the available telemetry.
+- Security findings should not extend beyond what the evidence supports.
+
+---
+
+## Detection Engineering Lessons
+
+Project ICARUS reinforced several practical detection-engineering principles:
+
+- Detection logic should target meaningful security events rather than simply collecting logs.
+- Request and completion events may need to be investigated separately.
+- Alert context should expose enough information for an analyst to understand what changed.
+- Overlapping query windows can create repeated detections and require tuning.
+- Entity mapping and custom alert details can improve investigation efficiency.
+- Detection rules should be validated through controlled test activity before broader deployment.
+
+---
+
+## Evidence Strategy
+
+The repository intentionally uses a limited set of screenshots that advance the investigation story.
+
+Evidence is focused on:
+
+- the expected baseline
+- the risky configuration or permission change
+- Sentinel detection
+- investigation findings
+- remediation
+- final validation
+- incident closure
+
+Intermediate setup screens and repetitive configuration steps are intentionally excluded from the main case studies unless they materially support the investigation.
 
 ---
 
 ## Interview Summary
 
-Built and validated a Microsoft Sentinel detection for Azure Storage network exposure. Traced the alert to its source event, verified successful execution and remediation, and documented incident closure for an authorized test.
+Built and validated an Azure cloud-security lab using Microsoft Sentinel and Azure Activity Logs.
+
+Created detections for risky storage-network exposure and excessive Azure RBAC permissions, investigated the underlying Azure control-plane events with KQL, correlated activity using operation details and correlation IDs, verified remediation, restored expected security baselines, and documented incident closure using evidence-based classifications.
+
+The project demonstrates practical experience with Microsoft Sentinel, Azure Activity Logs, KQL, RBAC investigation, cloud detection engineering, alert triage, remediation validation, and SOC-style incident response.
 
 ---
 
-## Next Steps
+## Project Status
 
-- Complete the ICARUS-01 evidence write-up.
-- Tune repeated-alert behavior.
-- Complete ICARUS-02 excessive-permissions testing.
-- Review Azure Policy and security posture.
-- Assemble the final portfolio evidence.
+```text
+PROJECT ICARUS: COMPLETE
 
----
+ICARUS-01 — Storage Network Exposure Detection: Complete
+ICARUS-02 — Excessive RBAC Permission Detection: Complete
+```
 
-## Lab Scope
-
-All testing was performed in an authorized personal Azure lab. Completed work and planned improvements are identified separately.
+Future work will focus on detection tuning and enrichment rather than completion of the core project.
