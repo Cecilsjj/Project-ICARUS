@@ -1,8 +1,36 @@
-# ICARUS-02: Excessive RBAC Permissions
-## Outcome
+```markdown
+# ICARUS-02 — Excessive RBAC Permission Detection
 
-I built and validated a Microsoft Sentinel detection workflow for Azure Role-Based Access Control (RBAC) changes involving excessive permissions.
+## Objective
 
-In this controlled lab, an ICARUS test user with a Reader baseline was temporarily granted the Contributor role. Microsoft Sentinel detected the RBAC change, generated a Medium-severity incident, and provided the underlying Azure Activity Log evidence for investigation.
+Detect an Azure Role-Based Access Control (RBAC) change that grants the ICARUS test user permissions beyond the intended Reader baseline, investigate whether the role assignment succeeded, and verify removal of the excessive access.
 
-The investigation confirmed a successful `Microsoft.Authorization/roleAssignments/write` event in `RG-PROJECT-ICARUS`. The Contributor assignment was then removed, the user was verified as returned to Reader-only access, and the incident was resolved as authorized security testing.
+This was an authorized test in a personal Azure lab.
+
+---
+
+## Lab Environment
+
+| Component | Resource |
+|---|---|
+| Resource group | RG-PROJECT-ICARUS |
+| Detection platform | Microsoft Sentinel |
+| Log source | AzureActivity |
+| Access-control model | Azure RBAC |
+| Test identity | ICARUS Test User |
+| Baseline role | Reader |
+| Elevated test role | Contributor |
+| Test date | September 25, 2026 |
+
+---
+
+## Key Concepts
+
+- **Reader:** Allows the user to view Azure resources without modifying them.
+- **Contributor:** Allows the user to manage Azure resources but does not allow management of Azure RBAC role assignments.
+- **Role assignment write:** Records the creation or modification of an Azure RBAC role assignment.
+- **Role assignment delete:** Records the removal of an Azure RBAC role assignment.
+- **CorrelationId:** Connects related Azure Activity Log events from the same operation.
+- **Baseline validation:** Confirms that an identity returned to its intended access level after remediation.
+
+A successful role-assignment event establishes that an RBAC change occurred. It does not,
