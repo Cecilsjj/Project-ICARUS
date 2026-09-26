@@ -14,7 +14,7 @@ This was an authorized test in a personal Azure lab.
 | Component | Resource |
 |---|---|
 | Resource group | RG-PROJECT-ICARUS |
-| Detection platform | Microsoft Sentinel |
+| Detection platform | Microsoft Sentinel | 
 | Log source | AzureActivity |
 | Access-control model | Azure RBAC |
 | Test identity | ICARUS Test User |
